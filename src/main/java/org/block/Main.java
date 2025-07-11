@@ -1,31 +1,35 @@
 package org.block;
 
+import java.security.Security;
 import java.util.ArrayList;
+
+import Transaction.Transaction;
 import com.google.gson.GsonBuilder;
+import wallet.Wallet;
 
 public class Main {
     public static ArrayList<Block> blockChain = new ArrayList<Block>();
     public static int difficulty = 6;
+    public static Wallet walletA;
+    public static Wallet walletB;
     public static void main(String[] args) {
-        blockChain.add(new Block("Hi im the first block", "0"));
-        System.out.println("Starting to mine block 1...");
-        blockChain.get(0).mineBlock(difficulty);
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
-        blockChain.add(new Block("Yo im the second block",blockChain.get(blockChain.size()-1).hash));
-        System.out.println("Starting to mine block 2");
-        blockChain.get(1).mineBlock(difficulty);
+        walletA = new Wallet();
+        walletB = new Wallet();
 
-        blockChain.add(new Block("Hey im the third block",blockChain.get(blockChain.size()-1).hash));
-        System.out.println("Starting to mine block 3");
-        blockChain.get(2).mineBlock(difficulty);
+        System.out.println(StringUtil.getStringFromKey(walletA.privateKey));
+        System.out.println(StringUtil.getStringFromKey(walletB.privateKey));
 
-        String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockChain);
-        if(IsChainValid()){
-            System.out.println("The chain is valid!!!");
-            System.out.println(blockchainJson);
-        }else{
-            System.out.println("The chain is invalid!!!");
-        };
+        System.out.println(StringUtil.getStringFromKey(walletA.publicKey));
+        System.out.println(StringUtil.getStringFromKey(walletB.publicKey));
+
+        Transaction transaction = new Transaction(walletA.publicKey, walletB.publicKey, 5,null);
+        transaction.generateSignature(walletA.privateKey);
+
+        System.out.println("Is signature verified");
+        System.out.println(transaction.verifySignature());
+
     }
 
     public static boolean IsChainValid(){
